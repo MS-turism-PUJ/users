@@ -38,7 +38,7 @@ info:
   app:
     name: Users MS
     description: Users microservice for turism project
-    version: 1.0.0
+    version: 0.0.1-SNAPSHOT
   company:
     name: Turismo
     contact:
