@@ -5,44 +5,5 @@ spring:
     # Otherwise gateway may not work correctly
     name: users
 
-server:
-  # To avoid colliding with other apps in port 8080
-  port: 8081
-
-eureka:
-  client:
-    # To report to Eureka when this service is up
-    registerWithEureka: true
-    # Eureka server URL
-    service-url:
-      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
-  instance:
-    # To avoid using DNS
-    prefer-ip-address: true
-
-# Actuator
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    health:
-      show-details: always
-  info:
-    env:
-      enabled: true
-
-# App metadata
-info:
-  app:
-    name: Users MS
-    description: Users microservice for turism project
-    version: 0.0.1-SNAPSHOT
-  company:
-    name: Turismo
-    contact:
-      email: support@mycompany.com
-      phone: +1234567890
-  build:
-    time: ${BUILD_TIME:2024-08-21T12:30:00Z}
+  config:
+    import: configserver:http://localhost:8888
