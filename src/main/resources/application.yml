@@ -6,4 +6,6 @@ spring:
     name: users
 
   config:
-    import: configserver:http://localhost:8888
+    import:
+      - file:../.env[.properties]
+      - configserver:http://localhost:8888
