@@ -28,8 +28,6 @@ public class SocialMedia {
     private String link;
     @Column(nullable = false)
     private String userName;
-    @Column(nullable = false)
-    private String userId;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
