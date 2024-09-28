@@ -20,12 +20,14 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String userId;
+    @Column(nullable = false, unique = true)
+    private String username;
     @Column(nullable = false)
     private String name;
     @Column(nullable = false)
     private Integer age;
     private String description;
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
     private String photo;
     private Long phone;
@@ -34,7 +36,8 @@ public class User {
     @OneToMany (mappedBy = "socialMediaId")
     private List<SocialMedia> socialMedia;
 
-    public User(String name, Integer age, String email, Long phone, String description, String photo, String web_page, UserType userType, List<SocialMedia> socialMedia) {
+    public User(String username, String name, Integer age, String email, Long phone, String description, String photo, String web_page, UserType userType, List<SocialMedia> socialMedia) {
+        this.username = username;
         this.name = name;
         this.age = age;
         this.email = email;

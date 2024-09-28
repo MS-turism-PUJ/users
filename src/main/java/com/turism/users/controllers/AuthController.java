@@ -1,10 +1,14 @@
 package com.turism.users.controllers;
 
+import com.turism.users.dtos.ErrorDTO;
+import com.turism.users.dtos.LoginDTO;
 import com.turism.users.dtos.RegisterClientDTO;
 import com.turism.users.dtos.RegisterProviderDTO;
 import com.turism.users.services.KeycloakService;
 import com.turism.users.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,21 +27,35 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String login() {
-        return "Login";
+    public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
+        return ResponseEntity.ok(keycloakService.authenticate(loginDTO.getUsername(), loginDTO.getPassword()));
     }
 
     @PostMapping("/client/register")
-    public String registerClient(@RequestBody RegisterClientDTO registerClientDTO) {
-        keycloakService.createClient(registerClientDTO.getName(), registerClientDTO.getPassword());
-        userService.createUser(registerClientDTO.toUser());
-        return "Register";
+    public ResponseEntity<?> registerClient(@RequestBody RegisterClientDTO registerClientDTO) {
+        if (!registerClientDTO.valid()) {
+            return ResponseEntity.badRequest().body(new ErrorDTO("Invalid data", "/auth/client/register", 400));
+        }
+        try {
+            userService.createUser(registerClientDTO.toUser());
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.badRequest().body(new ErrorDTO("Username or email already in use", "/auth/client/register", 400));
+        }
+        keycloakService.createClient(registerClientDTO.getUsername(), registerClientDTO.getEmail(), registerClientDTO.getName(), registerClientDTO.getPassword());
+        return ResponseEntity.ok(keycloakService.authenticate(registerClientDTO.getUsername(), registerClientDTO.getPassword()));
     }
 
     @PostMapping("/provider/register")
-    public String registerProvider(@RequestBody RegisterProviderDTO registerProviderDTO) {
-        keycloakService.createProvider(registerProviderDTO.getName(), registerProviderDTO.getPassword());
-        userService.createUser(registerProviderDTO.toUser());
-        return "Register";
+    public ResponseEntity<?> registerProvider(@RequestBody RegisterProviderDTO registerProviderDTO) {
+        if (!registerProviderDTO.valid()) {
+            return ResponseEntity.badRequest().body(new ErrorDTO("Invalid data", "/auth/client/register", 400));
+        }
+        try {
+            userService.createUser(registerProviderDTO.toUser());
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.badRequest().body(new ErrorDTO("Username or email already in use", "/auth/client/register", 400));
+        }
+        keycloakService.createProvider(registerProviderDTO.getUsername(), registerProviderDTO.getEmail(), registerProviderDTO.getName(), registerProviderDTO.getPassword());
+        return ResponseEntity.ok(keycloakService.authenticate(registerProviderDTO.getUsername(), registerProviderDTO.getPassword()));
     }
 }

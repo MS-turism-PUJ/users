@@ -3,6 +3,7 @@ package com.turism.users.services;
 import jakarta.annotation.PostConstruct;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -36,14 +37,18 @@ public class KeycloakService {
                 .build();
     }
 
-    private void createUser(String username, String password, String roleName) {
+    private void createUser(String username, String email, String name, String password, String roleName) {
         UserRepresentation user = new UserRepresentation();
         user.setUsername(username);
+        user.setEmail(email);
+        user.setEmailVerified(true);
         user.setEnabled(true);
+        user.setFirstName(name);
+        user.setLastName("no last name");
 
         // Configuración de la contraseña
         CredentialRepresentation passwordCredential = new CredentialRepresentation();
-        passwordCredential.setTemporary(false); // False si no es temporal
+        passwordCredential.setTemporary(false);
         passwordCredential.setType(CredentialRepresentation.PASSWORD);
         passwordCredential.setValue(password);
 
@@ -76,20 +81,22 @@ public class KeycloakService {
                 .add(Collections.singletonList(userRole));
     }
 
-    public void createClient(String username, String password) {
-        createUser(username, password, "ROLE_CLIENT");
+    public void createClient(String username, String email, String name, String password) {
+        createUser(username, email, name, password, "ROLE_CLIENT");
     }
-    public void createProvider(String username, String password) {
-        createUser(username, password, "ROLE_PROVIDER");
+    public void createProvider(String username, String email, String name, String password) {
+        createUser(username, email, name, password, "ROLE_PROVIDER");
     }
 
-    public Keycloak authenticate(String username, String password) {
-        return KeycloakBuilder.builder()
+    public AccessTokenResponse authenticate(String username, String password) {
+        keycloak = KeycloakBuilder.builder()
                 .serverUrl(serverUrl)
                 .realm(realm)
-                .clientId("TurismoClient")
+                .clientId("webapp")
                 .username(username)
                 .password(password)
                 .build();
+
+        return keycloak.tokenManager().getAccessToken();
     }
 }
