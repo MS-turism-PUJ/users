@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table  (name = "social_media")
+@Table  (name = "socialMedia")
 public class SocialMedia {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -29,6 +29,6 @@ public class SocialMedia {
     @Column(nullable = false)
     private String userName;
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "userId")
     private User user;
 }
