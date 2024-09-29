@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "mq.topic.name",
+      "type": "java.lang.String",
+      "description": "Custom settings for message queue"
+    }
+  ]
+}

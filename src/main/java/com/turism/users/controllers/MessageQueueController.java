@@ -17,10 +17,11 @@ import com.turism.users.services.MessageQueueService;
 public class MessageQueueController {
     @Autowired
     private MessageQueueService messageQueueService;
+
     @PostMapping("/send-simple-message")
     public ResponseEntity<String> sendSimpleMessage(@RequestBody String message) {
-    messageQueueService.sendMessage(new UserMessageDTO(LocalDateTime.now(), "this is a test message"));
-    System.out.println("Message sent: {}"+ message);
-    return ResponseEntity.ok().body(String.format("Message sent: %s", message));
+        messageQueueService.sendMessage(new UserMessageDTO(LocalDateTime.now(), "this is a test message"));
+        System.out.println("Message sent: "+ message);
+        return ResponseEntity.ok().body(String.format("Message sent: %s", message));
     }
 }
