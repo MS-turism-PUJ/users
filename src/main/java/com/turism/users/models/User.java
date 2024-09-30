@@ -2,6 +2,7 @@ package com.turism.users.models;
 
 import java.util.List;
 
+import com.turism.users.dtos.UserMessageDTO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -47,5 +48,9 @@ public class User {
         this.web_page = web_page;
         this.userType = userType;
         this.socialMedia = socialMedia;
+    }
+
+    public UserMessageDTO toUserMessageDTO() {
+        return new UserMessageDTO(userId, username, name, email, photo);
     }
 }

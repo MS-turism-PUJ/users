@@ -1,21 +1,20 @@
 package com.turism.users.dtos;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+
+import java.io.Serializable;
+
 
 @Getter
-@Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@ToString
-
-public class UserMessageDTO implements Serializable{
-    private LocalDateTime dateTime;
-    private String myMessageText;
+@AllArgsConstructor
+public class UserMessageDTO implements Serializable {
+    private String userId;
+    private String username;
+    private String name;
+    private String email;
+    private String photo;
 }
 

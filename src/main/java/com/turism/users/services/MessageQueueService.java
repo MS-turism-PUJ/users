@@ -1,25 +1,40 @@
 package com.turism.users.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.stream.function.StreamBridge;
-import org.springframework.messaging.support.MessageBuilder;
+import com.google.gson.Gson;
+import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 import com.turism.users.dtos.UserMessageDTO;
 
+import java.util.HashMap;
+import java.util.Map;
+
+@Slf4j
 @Service
 public class MessageQueueService {
-    // This attribute will store the queue name,
- // which is obtained from
- // the property spring.cloud.stream.bindings.sendMessage-out-0.destination
- // from the application.yml file
-    @Value("${spring.cloud.stream.bindings.sendMessage-out-0.destination}")
-    private String queueName;
-    @Autowired
-    private StreamBridge streamBridge;
-    
-    public boolean sendMessage(UserMessageDTO message) {
-    return streamBridge.send(queueName, MessageBuilder.withPayload(message).build());
+    private final String queueName = "usersQueue";
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+
+
+    public MessageQueueService() {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        ProducerFactory<String, Object> producerFactory = new DefaultKafkaProducerFactory<>(configProps);
+        this.kafkaTemplate = new KafkaTemplate<>(producerFactory);
+
+    }
+
+    public void sendMessage(UserMessageDTO user) {
+        Gson gson = new Gson();
+
+        kafkaTemplate.send(queueName, gson.toJson(user));
     }
 }

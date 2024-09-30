@@ -27,8 +27,12 @@ public class KeycloakService {
     private Keycloak keycloak;
 
     @PostConstruct
-    public void initKeycloak() {
-        this.keycloak = KeycloakBuilder.builder()
+    private void initKeycloak() {
+        authenticateAdmin();
+    }
+
+    private void authenticateAdmin() {
+        keycloak = KeycloakBuilder.builder()
                 .serverUrl(serverUrl)
                 .realm("master")
                 .clientId("admin-cli")
@@ -38,6 +42,8 @@ public class KeycloakService {
     }
 
     private void createUser(String username, String email, String name, String password, String roleName) {
+        authenticateAdmin();
+
         UserRepresentation user = new UserRepresentation();
         user.setUsername(username);
         user.setEmail(email);
