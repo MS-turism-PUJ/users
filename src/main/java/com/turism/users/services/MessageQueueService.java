@@ -18,7 +18,7 @@ import java.util.Map;
 @Slf4j
 @Service
 public class MessageQueueService {
-    private final String queueName = "usersQueue";
+    private static final String queueName = "usersQueue";
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
 
@@ -29,7 +29,6 @@ public class MessageQueueService {
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         ProducerFactory<String, Object> producerFactory = new DefaultKafkaProducerFactory<>(configProps);
         this.kafkaTemplate = new KafkaTemplate<>(producerFactory);
-
     }
 
     public void sendMessage(UserMessageDTO user) {
