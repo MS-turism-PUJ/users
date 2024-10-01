@@ -6,6 +6,7 @@ import com.turism.users.models.UserType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,7 @@ public class RegisterProviderDTO {
     private String name;
     private Integer age;
     private String description = null;
-    private String photo = null;
+    private MultipartFile photo = null;
     private Long phone;
     private String email;
     private String password;
@@ -37,7 +38,7 @@ public class RegisterProviderDTO {
                 email,
                 phone,
                 description,
-                photo,
+                username,
                 webPage,
                 UserType.PROVIDER,
                 socialMedia

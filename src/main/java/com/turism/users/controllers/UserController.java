@@ -4,7 +4,6 @@ import com.turism.users.dtos.ErrorDTO;
 import com.turism.users.models.User;
 import com.turism.users.services.MinioService;
 import com.turism.users.services.UserService;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +38,8 @@ public class UserController {
             log.error("Error uploading photo", e);
             return ResponseEntity.badRequest().body(new ErrorDTO("Error uploading photo", "/users/upload/photo", 400));
         }
-        userService.addPhoto(user, username);
-        return ResponseEntity.ok().body("Photo uploaded successfully");
+        user = userService.addPhoto(user, username);
+        return ResponseEntity.ok().body(user);
     }
 
     @GetMapping(value = "/photo")

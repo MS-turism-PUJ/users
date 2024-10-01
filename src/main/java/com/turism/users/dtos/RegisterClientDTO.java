@@ -4,13 +4,14 @@ import com.turism.users.models.SocialMedia;
 import com.turism.users.models.User;
 import com.turism.users.models.UserType;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegisterClientDTO {
@@ -18,7 +19,7 @@ public class RegisterClientDTO {
     private String name;
     private Integer age;
     private String description = null;
-    private String photo = null;
+    private MultipartFile photo = null;
     private String email;
     private String password;
     private List<SocialMedia> socialMedia = new ArrayList<>();
@@ -35,7 +36,7 @@ public class RegisterClientDTO {
                 email,
                 null,
                 description,
-                photo,
+                username,
                 null,
                 UserType.CLIENT,
                 socialMedia
