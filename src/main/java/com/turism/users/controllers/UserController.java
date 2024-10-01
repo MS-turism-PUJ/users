@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/")
 public class UserController {
     private final UserService userService;
     private final MinioService minioService;
