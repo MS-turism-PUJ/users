@@ -51,6 +51,6 @@ public class User {
     }
 
     public UserMessageDTO toUserMessageDTO() {
-        return new UserMessageDTO(userId, username, name, email, photo);
+        return new UserMessageDTO(userId, username, name, email);
     }
 }
