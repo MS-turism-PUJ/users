@@ -37,7 +37,7 @@ public class RegisterClientDTO {
                 description,
                 photo,
                 null,
-                UserType.PROVIDER,
+                UserType.CLIENT,
                 socialMedia
         );
     }
