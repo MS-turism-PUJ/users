@@ -45,6 +45,7 @@ public class AuthController {
         if (!registerClientDTO.valid()) {
             return ResponseEntity.badRequest().body(new ErrorDTO("Invalid data", "/auth/client/register", 400));
         }
+
         User user;
         try {
             user = userService.createUser(registerClientDTO.toUser());
@@ -52,13 +53,16 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new ErrorDTO("Username or email already in use", "/auth/client/register", 400));
         }
 
-        try {
-            minioService.uploadFile(user.getUsername(), registerClientDTO.getPhoto());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorDTO("Error uploading photo", "/auth/client/register", 400));
+        if (registerClientDTO.getPhoto() != null) {
+            try {
+                minioService.uploadFile(user.getUsername(), registerClientDTO.getPhoto());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(new ErrorDTO("Error uploading photo", "/auth/client/register", 400));
+            }
         }
+
         keycloakService.createClient(registerClientDTO.getUsername(), registerClientDTO.getEmail(), registerClientDTO.getName(), registerClientDTO.getPassword());
         messageQueueService.sendMessage(user.toUserMessageDTO());
         return ResponseEntity.ok(keycloakService.authenticate(registerClientDTO.getUsername(), registerClientDTO.getPassword()));
@@ -67,22 +71,27 @@ public class AuthController {
     @PostMapping("/provider/register")
     public ResponseEntity<?> registerProvider(@ModelAttribute RegisterProviderDTO registerProviderDTO) {
         if (!registerProviderDTO.valid()) {
-            return ResponseEntity.badRequest().body(new ErrorDTO("Invalid data", "/auth/client/register", 400));
+            return ResponseEntity.badRequest().body(new ErrorDTO("Invalid data", "/auth/provider/register", 400));
         }
+
         User user;
         try {
             user = userService.createUser(registerProviderDTO.toUser());
         } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.badRequest().body(new ErrorDTO("Username or email already in use", "/auth/client/register", 400));
+            return ResponseEntity.badRequest().body(new ErrorDTO("Username or email already in use", "/auth/provider/register", 400));
         }
 
-        try {
-            minioService.uploadFile(user.getUsername(), registerProviderDTO.getPhoto());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorDTO("Error uploading photo", "/auth/client/register", 400));
+        if (registerProviderDTO.getPhoto() != null) {
+            try {
+                minioService.uploadFile(user.getUsername(), registerProviderDTO.getPhoto());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (Exception e) {
+                System.out.println(e);
+                return ResponseEntity.badRequest().body(new ErrorDTO("Error uploading photo", "/auth/provider/register", 400));
+            }
         }
+
         keycloakService.createProvider(registerProviderDTO.getUsername(), registerProviderDTO.getEmail(), registerProviderDTO.getName(), registerProviderDTO.getPassword());
         messageQueueService.sendMessage(user.toUserMessageDTO());
         return ResponseEntity.ok(keycloakService.authenticate(registerProviderDTO.getUsername(), registerProviderDTO.getPassword()));
