@@ -1,6 +1,7 @@
 package com.turism.users.services;
 
 import jakarta.annotation.PostConstruct;
+import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.representations.AccessTokenResponse;
@@ -101,6 +102,18 @@ public class KeycloakService {
                 .clientId("webapp")
                 .username(username)
                 .password(password)
+                .build();
+
+        return keycloak.tokenManager().getAccessToken();
+    }
+
+    public AccessTokenResponse refresh(String refreshToken) {
+        keycloak = KeycloakBuilder.builder()
+                .serverUrl(serverUrl)
+                .realm(realm)
+                .clientId("webapp")
+                .grantType(OAuth2Constants.REFRESH_TOKEN)
+                .authorization("Bearer " + refreshToken)
                 .build();
 
         return keycloak.tokenManager().getAccessToken();
