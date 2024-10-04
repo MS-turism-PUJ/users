@@ -9,15 +9,12 @@ import com.turism.users.services.KeycloakService;
 import com.turism.users.services.MessageQueueService;
 import com.turism.users.services.MinioService;
 import com.turism.users.services.UserService;
-import io.minio.errors.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 
 @RestController
 @RequestMapping("/auth")
