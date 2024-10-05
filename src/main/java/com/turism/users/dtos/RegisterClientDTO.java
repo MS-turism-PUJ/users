@@ -35,10 +35,6 @@ public class RegisterClientDTO {
     private MultipartFile photo = null;
     private List<SocialMedia> socialMedia = new ArrayList<>();
 
-    public Boolean valid() {
-        return username != null && name != null && age != null && email != null && password != null;
-    }
-
     public User toUser() {
         return new User(
                 username,
