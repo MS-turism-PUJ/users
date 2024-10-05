@@ -1,6 +1,7 @@
 package com.turism.users.controllers;
 
 import com.turism.users.dtos.ErrorDTO;
+import com.turism.users.dtos.ValidationErrorDTO;
 import com.turism.users.models.User;
 import com.turism.users.services.MinioService;
 import com.turism.users.services.UserService;
@@ -30,13 +31,13 @@ public class UserController {
     public ResponseEntity<?> uploadPhoto(@RequestHeader("X-Preferred-Username") String username, @RequestParam("photo") MultipartFile photo) {
         User user = userService.getUserByUsername(username);
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDTO("User not found", "/users/upload/photo", 404));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDTO(null, "User not found"));
         }
         try {
             minioService.uploadFile(username, photo);
         } catch (Exception e) {
             log.error("Error uploading photo", e);
-            return ResponseEntity.badRequest().body(new ErrorDTO("Error uploading photo", "/users/upload/photo", 400));
+            return ResponseEntity.badRequest().body(new ValidationErrorDTO("photo", "Error uploading photo"));
         }
         user = userService.addPhoto(user, username);
         return ResponseEntity.ok().body(user);
@@ -46,10 +47,10 @@ public class UserController {
     public ResponseEntity<?> getPhoto(@RequestHeader("X-Preferred-Username") String username) {
         User user = userService.getUserByUsername(username);
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDTO("User not found", "/users/photo", 404));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDTO(null, "User not found"));
         }
         if (user.getPhoto() == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDTO("User has no photo", "/users/photo", 404));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDTO("photo", "User has no photo"));
         }
         try {
             return ResponseEntity.ok()

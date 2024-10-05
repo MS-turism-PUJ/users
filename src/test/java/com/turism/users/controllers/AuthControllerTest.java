@@ -16,8 +16,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.ArrayList;
-
 @SpringBootTest
 @AutoConfigureMockMvc
 class AuthControllerTest {
@@ -28,7 +26,7 @@ class AuthControllerTest {
     @Order(1)
     @Test
     void registerClientTest() throws Exception {
-        RegisterClientDTO registerClientDTO = new RegisterClientDTO("usernameTest", "nameTest", 20, null, null, "emailTest", "passwordTest", new ArrayList<>());
+        RegisterClientDTO registerClientDTO = new RegisterClientDTO("usernameTest", "nameTest", 20, "emailTest", "passwordTest", null, null, null);
         this.mockMvc.perform(post("/auth/client/register", registerClientDTO)).andDo(print()).andExpect(status().isOk())
                 .andExpect(content().string(containsString("access_token")));
     }
@@ -43,7 +41,7 @@ class AuthControllerTest {
     @Order(3)
     @Test
     void registerProviderTest() throws Exception {
-        RegisterProviderDTO registerProviderDTO = new RegisterProviderDTO("usernameTest", "nameTest", 20, null, null, 123456789L, "emailTest", "passwordTest", "https://google.com", new ArrayList<>());
+        RegisterProviderDTO registerProviderDTO = new RegisterProviderDTO("usernameTest", "nameTest", 20, 1234567891L, "emailTest", "passwordTest", "https://google.com", null, null, null);
         this.mockMvc.perform(post("/auth/provider/register", registerProviderDTO)).andDo(print()).andExpect(status().isOk())
                 .andExpect(content().string(containsString("access_token")));
     }
