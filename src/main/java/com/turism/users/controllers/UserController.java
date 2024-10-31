@@ -6,6 +6,7 @@ import com.turism.users.models.FileType;
 import com.turism.users.models.User;
 import com.turism.users.services.MinioService;
 import com.turism.users.services.UserService;
+
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.io.FilenameUtils;
@@ -33,6 +34,9 @@ public class UserController {
     public ResponseEntity<?> uploadPhoto(@RequestHeader("X-Preferred-Username") String username,
             @RequestParam("photo") MultipartFile photo) {
         log.info("Uploading photo for user {}", username);
+        if (photo.isEmpty()) {
+            return ResponseEntity.badRequest().body(new ValidationErrorDTO("photo", "Photo is required"));
+        }
         User user = userService.getUserByUsername(username);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDTO(null, "User not found"));

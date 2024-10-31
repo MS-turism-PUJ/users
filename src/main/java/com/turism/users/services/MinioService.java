@@ -43,7 +43,7 @@ public class MinioService {
 
         return minioClient.getObject(GetObjectArgs.builder()
         .bucket(bucketName)
-        .object(filename)
+        .object("users/" + filename)
         .build());
     }
 
@@ -54,7 +54,7 @@ public class MinioService {
         createBucket();
         minioClient.putObject(PutObjectArgs.builder()
                 .bucket(bucketName)
-                .object(filename)
+                .object("users/" + filename)
                 .stream(file.getInputStream(), file.getSize(), -1)
                 .contentType(contentType)
                 .build());
