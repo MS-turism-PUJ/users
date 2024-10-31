@@ -14,6 +14,7 @@ import com.turism.users.services.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
+import org.keycloak.representations.AccessTokenResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -42,13 +43,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginDTO loginDTO) {
         log.info("Login request for user {}", loginDTO.getUsername());
-        return ResponseEntity.ok(keycloakService.authenticate(loginDTO.getUsername(), loginDTO.getPassword()));
-    }
-
-    @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(@RequestBody String refreshToken) {
-        log.info("Refresh token request");
-        return ResponseEntity.ok(keycloakService.refresh(refreshToken));
+        AccessTokenResponse res = keycloakService.authenticate(loginDTO.getUsername(), loginDTO.getPassword());
+        User user = userService.getUserByUsername(loginDTO.getUsername());
+        res.setOtherClaims("role", user.getUserType());
+        return ResponseEntity.ok(res);
     }
 
     @PostMapping("/client/register")
