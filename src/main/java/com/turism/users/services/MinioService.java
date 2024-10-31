@@ -29,6 +29,7 @@ public class MinioService {
     private void createBucket() {
         try {
             if (!minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build())) {
+                log.info("Creating bucket");
                 minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
             }
         } catch (Exception e) {
@@ -37,22 +38,25 @@ public class MinioService {
     }
 
     public InputStream getObject(String filename) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        log.info("Getting object");
         createBucket();
-        InputStream stream;
-        stream = minioClient.getObject(GetObjectArgs.builder()
-                .bucket(bucketName)
-                .object(filename)
-                .build());
 
-        return stream;
+        return minioClient.getObject(GetObjectArgs.builder()
+        .bucket(bucketName)
+        .object(filename)
+        .build());
     }
 
     public void uploadFile(String filename, MultipartFile file) throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        log.info("Uploading file");
+        String contentType = file.getContentType();
+
         createBucket();
         minioClient.putObject(PutObjectArgs.builder()
                 .bucket(bucketName)
                 .object(filename)
                 .stream(file.getInputStream(), file.getSize(), -1)
+                .contentType(contentType)
                 .build());
     }
 }

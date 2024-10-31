@@ -22,6 +22,7 @@ public class MessageQueueService {
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public MessageQueueService() {
+        log.info("Creating Kafka producer");
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -38,6 +39,7 @@ public class MessageQueueService {
     }
 
     public void sendMessage(UserMessageDTO user) {
+        log.info("Sending message to Kafka");
         Gson gson = new Gson();
         try {
             kafkaTemplate.send(queueName, gson.toJson(user));

@@ -5,6 +5,8 @@ import java.util.List;
 import com.turism.users.dtos.UserMessageDTO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,23 +23,43 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String userId;
+
     @Column(nullable = false, unique = true)
     private String username;
+
     @Column(nullable = false)
     private String name;
+
     @Column(nullable = false)
     private Integer age;
-    private String description;
+
     @Column(nullable = false, unique = true)
     private String email;
+
+    @Column
+    private String description;
+
+    @Column
     private String photo;
+
+    @Column
+    private String photoExtension;
+
+    @Column
     private Long phone;
+
+    @Column
     private String web_page;
+
+    @Enumerated(EnumType.STRING)
+    @Column
     private UserType userType;
-    @OneToMany (mappedBy = "socialMediaId")
+
+    @OneToMany(mappedBy = "socialMediaId")
     private List<SocialMedia> socialMedia;
 
-    public User(String username, String name, Integer age, String email, Long phone, String description, String photo, String web_page, UserType userType, List<SocialMedia> socialMedia) {
+    public User(String username, String name, Integer age, String email, Long phone, String description, String photo, String photoExtension,
+            String web_page, UserType userType, List<SocialMedia> socialMedia) {
         this.username = username;
         this.name = name;
         this.age = age;
@@ -45,6 +67,7 @@ public class User {
         this.phone = phone;
         this.description = description;
         this.photo = photo;
+        this.photoExtension = photoExtension;
         this.web_page = web_page;
         this.userType = userType;
         this.socialMedia = socialMedia;

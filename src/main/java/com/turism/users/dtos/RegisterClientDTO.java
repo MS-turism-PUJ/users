@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ public class RegisterClientDTO {
                 null,
                 description,
                 username,
+                FilenameUtils.getExtension(photo.getOriginalFilename()),
                 null,
                 UserType.CLIENT,
                 socialMedia

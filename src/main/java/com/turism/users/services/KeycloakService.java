@@ -1,6 +1,8 @@
 package com.turism.users.services;
 
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 
+@Slf4j
 @Service
 public class KeycloakService {
     @Value("${keycloak.admin.username}")
@@ -33,6 +36,7 @@ public class KeycloakService {
     }
 
     private void authenticateAdmin() {
+        log.info("Authenticating as admin");
         keycloak = KeycloakBuilder.builder()
                 .serverUrl(serverUrl)
                 .realm("master")
@@ -43,6 +47,7 @@ public class KeycloakService {
     }
 
     private void createUser(String username, String email, String name, String password, String roleName) {
+        log.info("Creating user {}", username);
         authenticateAdmin();
 
         UserRepresentation user = new UserRepresentation();
@@ -89,13 +94,16 @@ public class KeycloakService {
     }
 
     public void createClient(String username, String email, String name, String password) {
+        log.info("Creating client {}", username);
         createUser(username, email, name, password, "ROLE_CLIENT");
     }
     public void createProvider(String username, String email, String name, String password) {
+        log.info("Creating provider {}", username);
         createUser(username, email, name, password, "ROLE_PROVIDER");
     }
 
     public AccessTokenResponse authenticate(String username, String password) {
+        log.info("Authenticating as {}", username);
         keycloak = KeycloakBuilder.builder()
                 .serverUrl(serverUrl)
                 .realm(realm)
@@ -108,6 +116,7 @@ public class KeycloakService {
     }
 
     public AccessTokenResponse refresh(String refreshToken) {
+        log.info("Refreshing token");
         keycloak = KeycloakBuilder.builder()
                 .serverUrl(serverUrl)
                 .realm(realm)

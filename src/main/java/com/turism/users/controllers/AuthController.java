@@ -12,6 +12,7 @@ import com.turism.users.services.MinioService;
 import com.turism.users.services.UserService;
 
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -29,7 +31,8 @@ public class AuthController {
     private final MinioService minioService;
 
     @Autowired
-    public AuthController(KeycloakService keycloakService, UserService userService, MessageQueueService messageQueueService, MinioService minioService) {
+    public AuthController(KeycloakService keycloakService, UserService userService,
+            MessageQueueService messageQueueService, MinioService minioService) {
         this.keycloakService = keycloakService;
         this.userService = userService;
         this.messageQueueService = messageQueueService;
@@ -38,12 +41,31 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginDTO loginDTO) {
+        log.info("Login request for user {}", loginDTO.getUsername());
         return ResponseEntity.ok(keycloakService.authenticate(loginDTO.getUsername(), loginDTO.getPassword()));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@RequestBody String refreshToken) {
+        log.info("Refresh token request");
+        return ResponseEntity.ok(keycloakService.refresh(refreshToken));
     }
 
     @PostMapping("/client/register")
     public ResponseEntity<?> registerClient(@Valid @ModelAttribute RegisterClientDTO registerClientDTO) {
+        log.info("Register request for client {}", registerClientDTO.getUsername());
+
         User user;
+
+        if (registerClientDTO.getPhoto() != null
+                && !registerClientDTO.getPhoto().getContentType().equals("image/jpeg")
+                && !registerClientDTO.getPhoto().getContentType().equals("image/png")
+                && !registerClientDTO.getPhoto().getContentType().equals("image/svg+xml")
+                && !registerClientDTO.getPhoto().getContentType().equals("image/webp")) {
+            return ResponseEntity.badRequest()
+                    .body(new ValidationErrorDTO("photo", "Photo extension not supported, only jpg, jpeg and png"));
+        }
+
         try {
             user = userService.createUser(registerClientDTO.toUser());
         } catch (DataIntegrityViolationException e) {
@@ -60,18 +82,33 @@ public class AuthController {
             }
         }
 
-        keycloakService.createClient(registerClientDTO.getUsername(), registerClientDTO.getEmail(), registerClientDTO.getName(), registerClientDTO.getPassword());
+        keycloakService.createClient(registerClientDTO.getUsername(), registerClientDTO.getEmail(),
+                registerClientDTO.getName(), registerClientDTO.getPassword());
         messageQueueService.sendMessage(user.toUserMessageDTO());
-        return ResponseEntity.ok(keycloakService.authenticate(registerClientDTO.getUsername(), registerClientDTO.getPassword()));
+        return ResponseEntity
+                .ok(keycloakService.authenticate(registerClientDTO.getUsername(), registerClientDTO.getPassword()));
     }
 
     @PostMapping("/provider/register")
     public ResponseEntity<?> registerProvider(@Valid @ModelAttribute RegisterProviderDTO registerProviderDTO) {
+        log.info("Register request for provider {}", registerProviderDTO.getUsername());
+
         User user;
+
+        if (registerProviderDTO.getPhoto() != null
+                && !registerProviderDTO.getPhoto().getContentType().equals("image/jpeg")
+                && !registerProviderDTO.getPhoto().getContentType().equals("image/png")
+                && !registerProviderDTO.getPhoto().getContentType().equals("image/svg+xml")
+                && !registerProviderDTO.getPhoto().getContentType().equals("image/webp")) {
+            return ResponseEntity.badRequest()
+                    .body(new ValidationErrorDTO("photo", "Photo extension not supported, only jpg, jpeg and png"));
+        }
+
         try {
             user = userService.createUser(registerProviderDTO.toUser());
         } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.badRequest().body(new ErrorDTO("username or password", "Username or email already in use"));
+            return ResponseEntity.badRequest()
+                    .body(new ErrorDTO("username or password", "Username or email already in use"));
         }
 
         if (registerProviderDTO.getPhoto() != null) {
@@ -85,8 +122,10 @@ public class AuthController {
             }
         }
 
-        keycloakService.createProvider(registerProviderDTO.getUsername(), registerProviderDTO.getEmail(), registerProviderDTO.getName(), registerProviderDTO.getPassword());
+        keycloakService.createProvider(registerProviderDTO.getUsername(), registerProviderDTO.getEmail(),
+                registerProviderDTO.getName(), registerProviderDTO.getPassword());
         messageQueueService.sendMessage(user.toUserMessageDTO());
-        return ResponseEntity.ok(keycloakService.authenticate(registerProviderDTO.getUsername(), registerProviderDTO.getPassword()));
+        return ResponseEntity
+                .ok(keycloakService.authenticate(registerProviderDTO.getUsername(), registerProviderDTO.getPassword()));
     }
 }
