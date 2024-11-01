@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.turism.users.dtos.ErrorDTO;
 import com.turism.users.dtos.ValidationErrorDTO;
 
-import jakarta.ws.rs.NotAuthorizedException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -47,17 +46,5 @@ public class GlobalExceptionHandler {
         log.info("Validation failed: {}", errors);
 
         return new ResponseEntity<>(new ErrorDTO("Validation failed", errors), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(NotAuthorizedException.class)
-    public ResponseEntity<Object> handleNotAuthorizedException(NotAuthorizedException e) {
-        log.info("Not authorized: {}", e.getMessage());
-        return new ResponseEntity<>(new ErrorDTO("Not authorized"), HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleException(Exception e) {
-        log.error("Unhandled exception", e);
-        return new ResponseEntity<>(new ErrorDTO("Internal server error"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

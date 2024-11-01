@@ -52,7 +52,7 @@ public class User {
     private String web_page;
 
     @Enumerated(EnumType.STRING)
-    @Column
+    @Column(nullable = false)
     private UserType userType;
 
     @OneToMany(mappedBy = "user")
