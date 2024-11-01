@@ -23,21 +23,30 @@ import java.util.List;
 public class RegisterProviderDTO {
     @NotBlank(message = "Username is required")
     private String username;
+
     @NotBlank(message = "Name is required")
     private String name;
+
     @Min(value = 0, message = "Age must be positive")
     @Max(value = 150, message = "Age must be less than 150")
     private Integer age;
+
     @Min(value = 1000000000, message = "Phone number must have 10 digits")
     private Long phone;
+
     @NotBlank(message = "Email is required")
     private String email;
+
     @NotBlank(message = "Password is required")
     private String password;
+
     @NotBlank(message = "Web page is required")
     private String webPage;
+
     private String description = null;
+
     private MultipartFile photo = null;
+
     private List<SocialMedia> socialMedia = new ArrayList<>();
 
     public User toUser() {
@@ -52,7 +61,6 @@ public class RegisterProviderDTO {
                 FilenameUtils.getExtension(photo.getOriginalFilename()),
                 webPage,
                 UserType.PROVIDER,
-                socialMedia
-        );
+                socialMedia);
     }
 }

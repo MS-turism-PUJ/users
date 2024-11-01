@@ -1,5 +1,7 @@
 package com.turism.users.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,19 +18,25 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table  (name = "socialMedia")
+@Table(name = "socialMedia")
 public class SocialMedia {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+
     @Column(nullable = false)
     private String socialMediaId;
+
     @Column(nullable = false)
     private String name;
+
     @Column(nullable = false)
     private String link;
+
     @Column(nullable = false)
     private String userName;
+
     @ManyToOne
     @JoinColumn(name = "userId")
+    @JsonIgnore
     private User user;
 }

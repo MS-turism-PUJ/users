@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.turism.users.dtos.ErrorDTO;
 import com.turism.users.dtos.ValidationErrorDTO;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})
@@ -36,9 +39,18 @@ public class GlobalExceptionHandler {
             }).collect(Collectors.toList());
         } else {
             // Default case, shouldn't happen
+            log.error("Unknown exception type: {}", e.getClass().getName());
             errors = List.of(new ValidationErrorDTO("unknown", "Unknown validation error"));
         }
 
+        log.info("Validation failed: {}", errors);
+
         return new ResponseEntity<>(new ErrorDTO("Validation failed", errors), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleException(Exception e) {
+        log.error("Unhandled exception", e);
+        return new ResponseEntity<>(new ErrorDTO("Internal server error"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

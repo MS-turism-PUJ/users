@@ -55,7 +55,7 @@ public class User {
     @Column
     private UserType userType;
 
-    @OneToMany(mappedBy = "socialMediaId")
+    @OneToMany(mappedBy = "user")
     private List<SocialMedia> socialMedia;
 
     public User(String username, String name, Integer age, String email, Long phone, String description, String photo, String photoExtension,
