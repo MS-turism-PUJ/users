@@ -10,6 +10,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.support.WebExchangeBindException;
 
 import com.turism.users.dtos.ErrorDTO;
 import com.turism.users.dtos.ValidationErrorDTO;
@@ -19,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})
+    @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class, WebExchangeBindException.class})
     public ResponseEntity<Object> handleMethodArgumentNotValidException(Exception e) {
         List<ValidationErrorDTO> errors;
         
@@ -32,6 +33,13 @@ public class GlobalExceptionHandler {
             }).collect(Collectors.toList());
         } else if (e instanceof BindException) {
             BindException ex = (BindException) e;
+            errors = ex.getBindingResult().getAllErrors().stream().map(error -> {
+                String fieldName = error instanceof FieldError ? ((FieldError) error).getField() : error.getObjectName();
+                String message = error.getDefaultMessage();
+                return new ValidationErrorDTO(fieldName, message);
+            }).collect(Collectors.toList());
+        } else if (e instanceof WebExchangeBindException) {
+            WebExchangeBindException ex = (WebExchangeBindException) e;
             errors = ex.getBindingResult().getAllErrors().stream().map(error -> {
                 String fieldName = error instanceof FieldError ? ((FieldError) error).getField() : error.getObjectName();
                 String message = error.getDefaultMessage();
