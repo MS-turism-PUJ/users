@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +23,6 @@ public class UserController {
     private final UserService userService;
     private final MinioService minioService;
 
-    @Autowired
     public UserController(UserService userService, MinioService minioService) {
         this.userService = userService;
         this.minioService = minioService;

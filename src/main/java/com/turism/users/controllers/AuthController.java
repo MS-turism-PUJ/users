@@ -15,7 +15,6 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 import org.keycloak.representations.AccessTokenResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +30,6 @@ public class AuthController {
     private final MessageQueueService messageQueueService;
     private final MinioService minioService;
 
-    @Autowired
     public AuthController(KeycloakService keycloakService, UserService userService,
             MessageQueueService messageQueueService, MinioService minioService) {
         this.keycloakService = keycloakService;
