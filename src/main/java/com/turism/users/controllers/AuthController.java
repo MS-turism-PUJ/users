@@ -74,6 +74,7 @@ public class AuthController {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } catch (Exception e) {
+                log.error("Error uploading photo", e);
                 return ResponseEntity.badRequest().body(new ErrorDTO("Error uploading photo"));
             }
         }
@@ -81,8 +82,10 @@ public class AuthController {
         keycloakService.createClient(registerClientDTO.getUsername(), registerClientDTO.getEmail(),
                 registerClientDTO.getName(), registerClientDTO.getPassword());
         messageQueueService.sendMessage(user.toUserMessageDTO());
-        return ResponseEntity
-                .ok(keycloakService.authenticate(registerClientDTO.getUsername(), registerClientDTO.getPassword()));
+        AccessTokenResponse res = keycloakService.authenticate(registerClientDTO.getUsername(),
+                registerClientDTO.getPassword());
+        res.setOtherClaims("role", user.getUserType());
+        return ResponseEntity.ok(res);
     }
 
     @PostMapping("/provider/register")
@@ -121,7 +124,9 @@ public class AuthController {
         keycloakService.createProvider(registerProviderDTO.getUsername(), registerProviderDTO.getEmail(),
                 registerProviderDTO.getName(), registerProviderDTO.getPassword());
         messageQueueService.sendMessage(user.toUserMessageDTO());
-        return ResponseEntity
-                .ok(keycloakService.authenticate(registerProviderDTO.getUsername(), registerProviderDTO.getPassword()));
+        AccessTokenResponse res = keycloakService.authenticate(registerProviderDTO.getUsername(),
+                registerProviderDTO.getPassword());
+        res.setOtherClaims("role", user.getUserType());
+        return ResponseEntity.ok(res);
     }
 }

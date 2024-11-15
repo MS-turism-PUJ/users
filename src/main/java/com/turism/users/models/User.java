@@ -49,7 +49,7 @@ public class User {
     private Long phone;
 
     @Column
-    private String web_page;
+    private String webPage;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -59,7 +59,7 @@ public class User {
     private List<SocialMedia> socialMedia;
 
     public User(String username, String name, Integer age, String email, Long phone, String description, String photo, String photoExtension,
-            String web_page, UserType userType, List<SocialMedia> socialMedia) {
+            String webPage, UserType userType, List<SocialMedia> socialMedia) {
         this.username = username;
         this.name = name;
         this.age = age;
@@ -68,7 +68,7 @@ public class User {
         this.description = description;
         this.photo = photo;
         this.photoExtension = photoExtension;
-        this.web_page = web_page;
+        this.webPage = webPage;
         this.userType = userType;
         this.socialMedia = socialMedia;
     }
