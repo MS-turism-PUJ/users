@@ -30,7 +30,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.multipart.MultipartFile;
 
 @WebMvcTest(AuthController.class)
 class AuthControllerTest {
@@ -54,23 +53,25 @@ class AuthControllerTest {
     void registerClientTest() throws Exception {
         User mockUser = new User("usernameTest", "nameTest", 20, "email@test.com", null,
                 "descriptionTest", "usernameTest", "jpg", null, UserType.CLIENT, List.of());
-        when(userService.createUser(any(User.class))).thenReturn(mockUser);
-
-        doNothing().when(minioService).uploadFile(anyString(), any(MultipartFile.class));
-
-        AccessTokenResponse accessTokenResponse = new AccessTokenResponse();
-        accessTokenResponse.setToken("fake_token");
-        accessTokenResponse.setTokenType("Bearer");
-        accessTokenResponse.setRefreshToken("fake_refresh_token");
-        accessTokenResponse.setOtherClaims("role", UserType.CLIENT.toString());
-        when(keycloakService.authenticate(anyString(), anyString()))
-                .thenReturn(accessTokenResponse);
 
         MockMultipartFile photo = new MockMultipartFile(
                 "photo",
                 "profile-picture.jpg",
                 "image/jpeg",
                 "Fake image content".getBytes());
+
+        AccessTokenResponse mockRes = new AccessTokenResponse();
+        mockRes.setToken("fake_token");
+        mockRes.setTokenType("Bearer");
+        mockRes.setRefreshToken("fake_refresh_token");
+        mockRes.setOtherClaims("role", UserType.CLIENT.toString());
+
+        when(userService.createUser(any(User.class))).thenReturn(mockUser);
+
+        when(keycloakService.authenticate(anyString(), anyString()))
+                .thenReturn(mockRes);
+
+        doNothing().when(minioService).uploadFile(mockUser.getPhoto(), photo);
 
         mockMvc.perform(multipart("/auth/client/register")
                 .file(photo)
@@ -90,17 +91,19 @@ class AuthControllerTest {
 
     @Test
     void loginClientTest() throws Exception {
-        AccessTokenResponse accessTokenResponse = new AccessTokenResponse();
-        accessTokenResponse.setToken("fake_token");
-        accessTokenResponse.setTokenType("Bearer");
-        accessTokenResponse.setRefreshToken("fake_refresh_token");
-        accessTokenResponse.setOtherClaims("role", UserType.CLIENT.toString());
-        when(keycloakService.authenticate(anyString(), anyString()))
-                .thenReturn(accessTokenResponse);
-
         User mockUser = new User("usernameTest", "nameTest", 20, "email@test.com", null,
                 "descriptionTest", "usernameTest", "jpg", null, UserType.CLIENT, List.of());
+
+        AccessTokenResponse mockRes = new AccessTokenResponse();
+        mockRes.setToken("fake_token");
+        mockRes.setTokenType("Bearer");
+        mockRes.setRefreshToken("fake_refresh_token");
+        mockRes.setOtherClaims("role", UserType.CLIENT.toString());
+
         when(userService.getUserByUsername(mockUser.getUsername())).thenReturn(mockUser);
+
+        when(keycloakService.authenticate(anyString(), anyString()))
+                .thenReturn(mockRes);
 
         LoginDTO loginDTO = new LoginDTO(mockUser.getUsername(), "passwordTest");
 
@@ -121,23 +124,25 @@ class AuthControllerTest {
     void registerProviderTest() throws Exception {
         User mockUser = new User("usernameTest", "nameTest", 20, "email@test.com", 1234567890L,
                 "descriptionTest", "usernameTest", "jpg", "www.google.com", UserType.PROVIDER, List.of());
-        when(userService.createUser(any(User.class))).thenReturn(mockUser);
-
-        doNothing().when(minioService).uploadFile(anyString(), any(MultipartFile.class));
-
-        AccessTokenResponse accessTokenResponse = new AccessTokenResponse();
-        accessTokenResponse.setToken("fake_token");
-        accessTokenResponse.setTokenType("Bearer");
-        accessTokenResponse.setRefreshToken("fake_refresh_token");
-        accessTokenResponse.setOtherClaims("role", UserType.CLIENT.toString());
-        when(keycloakService.authenticate(anyString(), anyString()))
-                .thenReturn(accessTokenResponse);
 
         MockMultipartFile photo = new MockMultipartFile(
                 "photo",
                 "profile-picture.jpg",
                 "image/jpeg",
                 "Fake image content".getBytes());
+
+        AccessTokenResponse mockRes = new AccessTokenResponse();
+        mockRes.setToken("fake_token");
+        mockRes.setTokenType("Bearer");
+        mockRes.setRefreshToken("fake_refresh_token");
+        mockRes.setOtherClaims("role", UserType.CLIENT.toString());
+
+        when(userService.createUser(any(User.class))).thenReturn(mockUser);
+
+        when(keycloakService.authenticate(anyString(), anyString()))
+                .thenReturn(mockRes);
+
+        doNothing().when(minioService).uploadFile(mockUser.getPhoto(), photo);
 
         mockMvc.perform(multipart("/auth/provider/register")
                 .file(photo)
@@ -159,17 +164,19 @@ class AuthControllerTest {
 
     @Test
     void loginProviderTest() throws Exception {
-        AccessTokenResponse accessTokenResponse = new AccessTokenResponse();
-        accessTokenResponse.setToken("fake_token");
-        accessTokenResponse.setTokenType("Bearer");
-        accessTokenResponse.setRefreshToken("fake_refresh_token");
-        accessTokenResponse.setOtherClaims("role", UserType.PROVIDER.toString());
-        when(keycloakService.authenticate(anyString(), anyString()))
-                .thenReturn(accessTokenResponse);
-
         User mockUser = new User("usernameTest", "nameTest", 20, "email@test.com", 1234567890L,
                 "descriptionTest", "usernameTest", "jpg", "www.google.com", UserType.PROVIDER, List.of());
+
+        AccessTokenResponse mockRes = new AccessTokenResponse();
+        mockRes.setToken("fake_token");
+        mockRes.setTokenType("Bearer");
+        mockRes.setRefreshToken("fake_refresh_token");
+        mockRes.setOtherClaims("role", UserType.PROVIDER.toString());
+
         when(userService.getUserByUsername(mockUser.getUsername())).thenReturn(mockUser);
+
+        when(keycloakService.authenticate(anyString(), anyString()))
+                .thenReturn(mockRes);
 
         LoginDTO loginDTO = new LoginDTO(mockUser.getUsername(), "passwordTest");
 
