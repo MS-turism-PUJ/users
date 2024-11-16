@@ -55,11 +55,10 @@ public class RegisterClientDTO {
                 email,
                 null,
                 description,
-                username,
-                FilenameUtils.getExtension(photo.getOriginalFilename()),
+                photo != null ? username : null,
+                photo != null ? FilenameUtils.getExtension(photo.getOriginalFilename()) : null,
                 null,
                 UserType.CLIENT,
-                socialMedia
-        );
+                socialMedia);
     }
 }

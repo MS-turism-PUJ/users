@@ -61,8 +61,8 @@ public class RegisterProviderDTO {
                 email,
                 phone,
                 description,
-                username,
-                FilenameUtils.getExtension(photo.getOriginalFilename()),
+                photo != null ? username : null,
+                photo != null ? FilenameUtils.getExtension(photo.getOriginalFilename()) : null,
                 webPage,
                 UserType.PROVIDER,
                 socialMedia);

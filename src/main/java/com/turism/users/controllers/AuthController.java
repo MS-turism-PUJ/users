@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.AccessTokenResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -47,6 +48,7 @@ public class AuthController {
         return ResponseEntity.ok(res);
     }
 
+    @Transactional
     @PostMapping("/client/register")
     public ResponseEntity<?> registerClient(@Valid @ModelAttribute RegisterClientDTO registerClientDTO) {
         log.info("Register request for client {}", registerClientDTO.getUsername());
@@ -88,6 +90,7 @@ public class AuthController {
         return ResponseEntity.ok(res);
     }
 
+    @Transactional
     @PostMapping("/provider/register")
     public ResponseEntity<?> registerProvider(@Valid @ModelAttribute RegisterProviderDTO registerProviderDTO) {
         log.info("Register request for provider {}", registerProviderDTO.getUsername());
