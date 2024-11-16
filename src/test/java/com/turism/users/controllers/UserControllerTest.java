@@ -1,76 +1,94 @@
 package com.turism.users.controllers;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.io.ByteArrayInputStream;
+import java.util.List;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.MinIOContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.turism.users.models.User;
-import com.turism.users.services.KeycloakService;
-import com.turism.users.services.MessageQueueService;
-import com.turism.users.services.MinioService;
-import com.turism.users.services.UserService;
+import com.turism.users.models.UserType;
+import com.turism.users.repositories.UserRepository;
 
-@WebMvcTest(UserController.class)
-@Transactional
+@SpringBootTest
+@Testcontainers
+@AutoConfigureMockMvc
+@TestMethodOrder(OrderAnnotation.class)
 public class UserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private KeycloakService keycloakService;
+    @Container
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14-alpine");
 
-    @MockBean
-    private UserService userService;
+    @Container
+    static MinIOContainer minio = new MinIOContainer("minio/minio:RELEASE.2023-09-04T19-57-37Z");
 
-    @MockBean
-    private MessageQueueService messageQueueService;
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("minio.url", minio::getS3URL);
+        registry.add("minio.access.key", minio::getUserName);
+        registry.add("minio.access.secret", minio::getPassword);
+    }
 
-    @MockBean
-    private MinioService minioService;
+    static final User mockClient = new User("clientUsernameTest", "clientNameTest", 20, "clientEmail@test.com", null,
+            "clientDescriptionTest", "clientUsernameTest", "jpg", null, UserType.CLIENT, List.of());
+
+    static final MockMultipartFile mockPhotoJPG = new MockMultipartFile(
+            "photo",
+            "profile-picture.jpg",
+            "image/jpeg",
+            "Fake image content".getBytes());
+
+    @BeforeAll
+    static void beforeAll(@Autowired UserRepository userRepository) {
+        postgres.start();
+        minio.start();
+        userRepository.save(mockClient);
+    }
+
+    @AfterAll
+    static void afterAll() {
+        postgres.stop();
+        minio.stop();
+    }
 
     @Test
+    @Order(1)
     void uploadPhotoTest() throws Exception {
-        String username = "testuser";
-        MockMultipartFile photo = new MockMultipartFile("photo", "test.jpg", "image/jpeg",
-                "test image content".getBytes());
-
-        when(userService.getUserByUsername(username)).thenReturn(new User());
-        doNothing().when(minioService).uploadFile(username, photo);
-        when(userService.addPhoto(any(User.class), eq(username), eq("jpg"))).thenReturn(new User());
-
         mockMvc.perform(multipart("/upload/photo")
-                .file(photo)
-                .header("X-Preferred-Username", username))
+                .file(mockPhotoJPG)
+                .header("X-Preferred-Username", mockClient.getUsername()))
                 .andExpect(status().isOk());
     }
 
     @Test
+    @Order(2)
     void getPhotoTest() throws Exception {
-        String username = "testuser";
-        User user = new User();
-        user.setPhoto("photo.jpg");
-        user.setPhotoExtension("jpg");
-
-        when(userService.getUserByUsername(username)).thenReturn(user);
-        when(minioService.getObject(user.getPhoto())).thenReturn(new ByteArrayInputStream("test image content".getBytes()));
-
         mockMvc.perform(get("/photo")
-                .header("X-Preferred-Username", username))
+                .header("X-Preferred-Username", mockClient.getUsername()))
                 .andExpect(status().isOk());
     }
 }
