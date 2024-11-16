@@ -24,7 +24,8 @@ public class KeycloakService {
     @Value("${keycloak.admin.password}")
     private String adminPassword;
 
-    private final String serverUrl = "http://localhost:9000/";
+    @Value("${keycloak.auth-server-url}")
+    private String serverUrl;
 
     private final String realm = "TurismoRealm";
 

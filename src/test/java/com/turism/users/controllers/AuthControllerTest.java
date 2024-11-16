@@ -2,8 +2,6 @@ package com.turism.users.controllers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -21,9 +19,9 @@ import com.turism.users.dtos.LoginDTO;
 import com.turism.users.models.User;
 import com.turism.users.models.UserType;
 import com.turism.users.repositories.UserRepository;
-import com.turism.users.services.KeycloakService;
 
-import org.keycloak.representations.AccessTokenResponse;
+import dasniko.testcontainers.keycloak.KeycloakContainer;
+
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -37,7 +35,6 @@ import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.mock.web.MockMultipartFile;
@@ -60,9 +57,6 @@ class AuthControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private KeycloakService keycloakService;
-
     @Autowired
     private UserRepository userRepository;
 
@@ -75,15 +69,26 @@ class AuthControllerTest {
     @Container
     static final KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.6.1"));
 
+    @SuppressWarnings("resource")
+    @Container
+    static final KeycloakContainer keycloak = new KeycloakContainer(
+            "quay.io/keycloak/keycloak:25.0.5").withRealmImportFile("/turismo-realm.json");
+
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
+
         registry.add("minio.url", minio::getS3URL);
         registry.add("minio.access.key", minio::getUserName);
         registry.add("minio.access.secret", minio::getPassword);
+
         registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
+
+        registry.add("keycloak.auth-server-url", keycloak::getAuthServerUrl);
+        registry.add("keycloak.admin.username", keycloak::getAdminUsername);
+        registry.add("keycloak.admin.password", keycloak::getAdminPassword);
     }
 
     static KafkaConsumer<Object, Object> mockKafkaConsumer;
@@ -107,6 +112,7 @@ class AuthControllerTest {
         minio.start();
         kafka.start();
         createMockKafkaConsumer();
+        keycloak.start();
     }
 
     @AfterAll
@@ -114,6 +120,7 @@ class AuthControllerTest {
         postgres.stop();
         minio.stop();
         kafka.stop();
+        keycloak.stop();
     }
 
     static final User mockClient = new User("clientUsernameTest", "clientNameTest", 20, "clientEmail@test.com",
@@ -145,15 +152,6 @@ class AuthControllerTest {
     @Test
     @Order(1)
     void registerClientTest() throws Exception {
-        AccessTokenResponse mockRes = new AccessTokenResponse();
-        mockRes.setToken("fake_token");
-        mockRes.setTokenType("Bearer");
-        mockRes.setRefreshToken("fake_refresh_token");
-        mockRes.setOtherClaims("role", UserType.CLIENT.toString());
-
-        when(keycloakService.authenticate(anyString(), anyString()))
-                .thenReturn(mockRes);
-
         mockMvc.perform(multipart("/auth/client/register")
                 .file(mockPhotoJPG)
                 .param("username", mockClient.getUsername())
@@ -164,24 +162,15 @@ class AuthControllerTest {
                 .param("description", mockClient.getDescription()))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.access_token").value("fake_token"))
+                .andExpect(jsonPath("$.access_token").isString())
                 .andExpect(jsonPath("$.token_type").value("Bearer"))
-                .andExpect(jsonPath("$.refresh_token").value("fake_refresh_token"))
+                .andExpect(jsonPath("$.refresh_token").isString())
                 .andExpect(jsonPath("$.role").value(UserType.CLIENT.toString()));
     }
 
     @Test
     @Order(2)
     void loginClientTest() throws Exception {
-        AccessTokenResponse mockRes = new AccessTokenResponse();
-        mockRes.setToken("fake_token");
-        mockRes.setTokenType("Bearer");
-        mockRes.setRefreshToken("fake_refresh_token");
-        mockRes.setOtherClaims("role", UserType.CLIENT.toString());
-
-        when(keycloakService.authenticate(anyString(), anyString()))
-                .thenReturn(mockRes);
-
         LoginDTO loginDTO = new LoginDTO(mockClient.getUsername(), mockClientPassword);
 
         Gson gson = new Gson();
@@ -191,24 +180,15 @@ class AuthControllerTest {
                 .content(gson.toJson(loginDTO)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.access_token").value("fake_token"))
+                .andExpect(jsonPath("$.access_token").isString())
                 .andExpect(jsonPath("$.token_type").value("Bearer"))
-                .andExpect(jsonPath("$.refresh_token").value("fake_refresh_token"))
+                .andExpect(jsonPath("$.refresh_token").isString())
                 .andExpect(jsonPath("$.role").value(UserType.CLIENT.toString()));
     }
 
     @Test
     @Order(1)
     void registerProviderTest() throws Exception {
-        AccessTokenResponse mockRes = new AccessTokenResponse();
-        mockRes.setToken("fake_token");
-        mockRes.setTokenType("Bearer");
-        mockRes.setRefreshToken("fake_refresh_token");
-        mockRes.setOtherClaims("role", UserType.CLIENT.toString());
-
-        when(keycloakService.authenticate(anyString(), anyString()))
-                .thenReturn(mockRes);
-
         mockMvc.perform(multipart("/auth/provider/register")
                 .file(mockPhotoPNG)
                 .param("username", mockProvider.getUsername())
@@ -221,24 +201,15 @@ class AuthControllerTest {
                 .param("phone", mockProvider.getPhone().toString()))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.access_token").value("fake_token"))
+                .andExpect(jsonPath("$.access_token").isString())
                 .andExpect(jsonPath("$.token_type").value("Bearer"))
-                .andExpect(jsonPath("$.refresh_token").value("fake_refresh_token"))
+                .andExpect(jsonPath("$.refresh_token").isString())
                 .andExpect(jsonPath("$.role").value(UserType.PROVIDER.toString()));
     }
 
     @Test
     @Order(2)
     void loginProviderTest() throws Exception {
-        AccessTokenResponse mockRes = new AccessTokenResponse();
-        mockRes.setToken("fake_token");
-        mockRes.setTokenType("Bearer");
-        mockRes.setRefreshToken("fake_refresh_token");
-        mockRes.setOtherClaims("role", UserType.PROVIDER.toString());
-
-        when(keycloakService.authenticate(anyString(), anyString()))
-                .thenReturn(mockRes);
-
         LoginDTO loginDTO = new LoginDTO(mockProvider.getUsername(), mockProviderPassword);
 
         Gson gson = new Gson();
@@ -248,9 +219,9 @@ class AuthControllerTest {
                 .content(gson.toJson(loginDTO)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.access_token").value("fake_token"))
+                .andExpect(jsonPath("$.access_token").isString())
                 .andExpect(jsonPath("$.token_type").value("Bearer"))
-                .andExpect(jsonPath("$.refresh_token").value("fake_refresh_token"))
+                .andExpect(jsonPath("$.refresh_token").isString())
                 .andExpect(jsonPath("$.role").value(UserType.PROVIDER.toString()));
     }
 
@@ -269,8 +240,10 @@ class AuthControllerTest {
         User mockClientSaved = userRepository.findByUsername(mockClient.getUsername());
         User mockProviderSaved = userRepository.findByUsername(mockProvider.getUsername());
 
-        String expectedClientMessage = new Gson().toJson(mockClientSaved.toUserMessageDTO());
-        String expectedProviderMessage = new Gson().toJson(mockProviderSaved.toUserMessageDTO());
+        Gson gson = new Gson();
+
+        String expectedClientMessage = gson.toJson(mockClientSaved.toUserMessageDTO());
+        String expectedProviderMessage = gson.toJson(mockProviderSaved.toUserMessageDTO());
 
         assertTrue(actualMessages.contains(expectedClientMessage), "Client message not found in Kafka");
         assertTrue(actualMessages.contains(expectedProviderMessage), "Provider message not found in Kafka");
