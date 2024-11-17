@@ -64,7 +64,7 @@ class AuthControllerTest {
     static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14-alpine");
 
     @Container
-    static final MinIOContainer minio = new MinIOContainer("minio/minio:RELEASE.2023-09-04T19-57-37Z");
+    static final MinIOContainer minio = new MinIOContainer("minio/minio:RELEASE.2024-11-07T00-52-20Z.fips");
 
     @Container
     static final KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.6.1"));

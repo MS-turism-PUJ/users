@@ -41,7 +41,7 @@ public class UserControllerTest {
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14-alpine");
 
     @Container
-    static MinIOContainer minio = new MinIOContainer("minio/minio:RELEASE.2023-09-04T19-57-37Z");
+    static MinIOContainer minio = new MinIOContainer("minio/minio:RELEASE.2024-11-07T00-52-20Z.fips");
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
