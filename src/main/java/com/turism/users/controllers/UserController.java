@@ -15,6 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @Slf4j
 @RestController
@@ -28,6 +31,11 @@ public class UserController {
         this.minioService = minioService;
     }
 
+    @GetMapping
+    public  ResponseEntity<?> getMethodName(@RequestHeader("X-Preferred-Username") String username) {
+        return  ResponseEntity.ok().body(userService.getUserByUsername(username));
+    }
+    
     @PostMapping(value = "/upload/photo")
     public ResponseEntity<?> uploadPhoto(@RequestHeader("X-Preferred-Username") String username,
             @RequestParam("photo") MultipartFile photo) {
