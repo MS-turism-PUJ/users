@@ -32,7 +32,7 @@ public class UserController {
     }
 
     @GetMapping
-    public  ResponseEntity<?> getMethodName(@RequestHeader("X-Preferred-Username") String username) {
+    public  ResponseEntity<?> getMyInfo(@RequestHeader("X-Preferred-Username") String username) {
         return  ResponseEntity.ok().body(userService.getUserByUsername(username));
     }
     
