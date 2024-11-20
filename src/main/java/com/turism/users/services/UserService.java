@@ -32,4 +32,22 @@ public class UserService {
         user.setPhotoExtension(extension);
         return userRepository.save(user);
     }
+
+    public String getUserPhoto(String username) {
+        log.info("Getting photo for user: " + username);
+        User user = userRepository.findByUsername(username);
+
+        if (user == null) {
+            throw new IllegalArgumentException("User not found: " + username);
+        }
+
+        String photo = user.getPhoto();
+        if (photo == null || photo.isEmpty()) {
+            log.warn("Photo not found for user: " + username);
+            return "no hay foto"; 
+        }
+
+        return photo;
+    }
+
 }
